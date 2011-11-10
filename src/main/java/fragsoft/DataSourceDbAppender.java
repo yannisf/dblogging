@@ -3,9 +3,10 @@ package fragsoft;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
-
-import oracle.jdbc.pool.OracleDataSource;
 
 import org.apache.log4j.jdbc.JDBCAppender;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 public final class DataSourceDbAppender extends JDBCAppender {
 	
 	private static final Logger log = LoggerFactory.getLogger(DataSourceDbAppender.class);
+	private static final String DS_JNDI = "???";
 	private static DataSource ds = null;
 	
 	static {
@@ -22,15 +24,13 @@ public final class DataSourceDbAppender extends JDBCAppender {
 	}
 	
 	private static final DataSource initializeDatasource() {
-		OracleDataSource dataSource = null;
+		DataSource dataSource = null;
 		try {
-			dataSource = new OracleDataSource();
-			dataSource.setURL("jdbc:oracle:thin:@dbgr3:1521:EUDRACT");
-			dataSource.setUser("EUDRACT_V8_5215_DEV");
-			dataSource.setPassword("EUDRACT_V8_5215_DEV");
+			Context ctx = new InitialContext();
+			ds = (DataSource)ctx.lookup(DS_JNDI);
 			log.info("Datasource initialized");
-		} catch (SQLException e) {
-			log.error("Error: ", e);
+		} catch (NamingException ne) {
+			log.error("Error: ", ne);
 		}
 		
 		return dataSource;
